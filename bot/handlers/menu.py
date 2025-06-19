@@ -1,7 +1,7 @@
 from aiogram import Router, types, F, filters
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from bot.state.wallet_states import WalletStates
+from bot.states.wallet_states import WalletStates
 
 menu_router = Router()
 

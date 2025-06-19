@@ -1,72 +1,92 @@
 from aiogram import Router, types, filters, F
+from aiogram.filters import CommandObject
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+from bot.states.wallet_states import WalletStates
+from db.crud import add_wallet, get_wallets_by_user, delete_wallet_by_user
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db.session import get_async_session
 
 wallets_router = Router()
 
 
-class AddWallet(StatesGroup):
-    waiting_for_name = State()
-    waiting_for_address = State()
-
-
-wallets = {}
-
-
 @wallets_router.message(filters.Command("add"))
-async def wallet_name(msg: types.Message, state: FSMContext):
-    await state.update_data(name=msg.text)
-    await msg.answer("Введи адресу гаманця:")
-    await state.set_state(AddWallet.waiting_for_address)
+async def cmd_start_add_wallet(msg: types.Message, state: FSMContext):
+    await msg.answer("📝 Введи назву гаманця:")
+    await state.set_state(WalletStates.waiting_for_wallet_name)
 
 
-@wallets_router.message(F.state == AddWallet.waiting_for_name)
-async def cmd_add_wallet(msg: types.Message, state: FSMContext):
-    await msg.answer("Введи назву гаманця:")
-    await state.set_state(AddWallet.waiting_for_name)
+@wallets_router.message(F.state == WalletStates.waiting_for_wallet_name)
+async def process_wallet_name(msg: types.Message, state: FSMContext):
+    await state.update_data(wallet_name=msg.text.strip())
+    await msg.answer("📥 Тепер введи адресу гаманця:")
+    await state.set_state(WalletStates.waiting_for_wallet_address)
 
 
-@wallets_router.message(F.state == AddWallet.waiting_for_address)
-async def wallet_address(msg: types.Message, state: FSMContext):
+@wallets_router.message(F.state == WalletStates.waiting_for_wallet_address)
+async def process_wallet_address(msg: types.Message, state: FSMContext,
+                                 session: AsyncSession = F.depends(get_async_session)):
     data = await state.get_data()
-    name = data.get("name")
-    address = msg.text
+    name = data.get("wallet_name")
+    address = msg.text.strip()
+    user_id = msg.from_user.id
 
-    user_wallets = wallets.get(msg.from_user.id, [])
-    user_wallets.append({"name": name, "address": address})
-    wallets[msg.from_user.id] = user_wallets
+    await add_wallet(session, user_id=user_id, name=name, address=address)
 
-    await msg.answer(f"Гаманець '{name}' з адресою {address} додано.")
+    await msg.answer(f"✅ Гаманець '{name}' з адресою `{address}` додано!", parse_mode="Markdown")
     await state.clear()
 
 
 @wallets_router.message(filters.Command("list"))
-async def list_wallets(msg: types.Message):
-    user_wallets = wallets.get(msg.from_user.id, [])
-    if not user_wallets:
+async def list_wallets(msg: types.Message, session: AsyncSession = F.depends(get_async_session)):
+    user_id = msg.from_user.id
+    wallets = await get_wallets_by_user(session, user_id)
+
+    if not wallets:
         await msg.answer("У вас поки немає доданих гаманців.")
         return
 
     response = "Ваші гаманці:\n"
-    for w in user_wallets:
-        response += f"• {w['name']}: {w['address']}\n"
+    for w in wallets:
+        response += f"• {w.name}: {w.address}\n"
     await msg.answer(response)
 
 
-@wallets_router.message(filters.Command("stats"))
-async def stats_all_wallets(msg: types.Message):
-    user_wallets = wallets.get(msg.from_user.id, [])
+@wallets_router.message(filters.Command("delete"))
+async def delete_wallet_handler(msg: types.Message, command: CommandObject):
+    args = command.args
+    if not args:
+        await msg.answer("❌ Вкажи назву або адресу гаманця: `/delete MyWallet` або `/delete Hf1Z...`",
+                         parse_mode="Markdown")
+        return
 
-    if not user_wallets:
+    user_id = msg.from_user.id
+    success = False
+
+    async for session in get_async_session():
+        success = await delete_wallet_by_user(session, user_id=user_id, name_or_address=args.strip())
+
+    if success:
+        await msg.answer("✅ Гаманець успішно видалено.")
+    else:
+        await msg.answer("⚠️ Гаманець не знайдено.")
+
+
+@wallets_router.message(filters.Command("stats"))
+async def stats_all_wallets(msg: types.Message, session: AsyncSession = F.depends(get_async_session)):
+    user_id = msg.from_user.id
+    wallets = await get_wallets_by_user(session, user_id)
+
+    if not wallets:
         await msg.answer("У тебе поки немає доданих гаманців.")
         return
 
-    # Заглушка: фейкові дані для кожного гаманця
+    # Заглушка для статистики
     response_lines = []
     total_transactions_all = 0
     successful_transactions_all = 0
 
-    for wallet in user_wallets:
+    for wallet in wallets:
         total = 100  # фейкові загальні транзакції
         successful = 75  # фейкові успішні транзакції
         winrate = (successful / total) * 100
@@ -75,13 +95,12 @@ async def stats_all_wallets(msg: types.Message):
         successful_transactions_all += successful
 
         response_lines.append(
-            f"Гаманець '{wallet['name']}':\n"
+            f"Гаманець '{wallet.name}':\n"
             f"  Всього транзакцій: {total}\n"
             f"  Успішних транзакцій: {successful}\n"
             f"  Winrate: {winrate:.2f}%\n"
         )
 
-    # Загальна статистика по всіх гаманцях
     overall_winrate = (successful_transactions_all / total_transactions_all) * 100 if total_transactions_all > 0 else 0
 
     response_lines.append(
