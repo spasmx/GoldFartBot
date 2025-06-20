@@ -1,4 +1,4 @@
-from sqlalchemy import delete
+from sqlalchemy import delete, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from db.models import Wallet
@@ -20,9 +20,14 @@ async def get_wallets_by_user(session: AsyncSession, user_id: int):
 
 async def delete_wallet_by_user(session: AsyncSession, user_id: int, name_or_address: str):
     stmt = delete(Wallet).where(
-        Wallet.user_id == user_id,
-        (Wallet.name == name_or_address) | (Wallet.address == name_or_address)
+        and_(
+            Wallet.user_id == user_id,
+            or_(
+                Wallet.name == name_or_address,
+                Wallet.address == name_or_address
+            )
+        )
     )
     result = await session.execute(stmt)
     await session.commit()
-    return result.rowcount > 0  # True якщо щось видалено
+    return result.rowcount > 0
