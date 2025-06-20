@@ -6,7 +6,6 @@ from db.crud import add_wallet, get_wallets_by_user, delete_wallet_by_user
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.session import get_async_session
 
-
 wallets_router = Router()
 
 
@@ -14,7 +13,6 @@ wallets_router = Router()
 async def cmd_start_add_wallet(msg: types.Message, state: FSMContext):
     await msg.answer("📝 Введи назву гаманця:")
     await state.set_state(WalletStates.waiting_for_wallet_name)
-    print(state)
 
 
 @wallets_router.message(filters.StateFilter(WalletStates.waiting_for_wallet_name))
@@ -40,6 +38,26 @@ async def process_wallet_address(
     await state.clear()
 
 
+@wallets_router.message(filters.Command("delete"))
+async def cmd_start_delete_wallet(msg: types.Message, state: FSMContext):
+    await msg.answer("❌ Вкажи назву або адресу гаманця: `MyWallet` або `Hf1Z...`",
+                     parse_mode="Markdown")
+    await state.set_state(WalletStates.waiting_for_wallet_delete)
+
+
+@wallets_router.message(filters.StateFilter(WalletStates.waiting_for_wallet_delete))
+async def process_delete_wallet(msg: types.Message, state: FSMContext, session: AsyncSession):
+    data = await state.get_data()
+    name_or_address = msg.text.strip()
+    user_id = msg.from_user.id
+
+    success = await delete_wallet_by_user(session, user_id=user_id, name_or_address=name_or_address)
+
+    if success:
+        await msg.answer("✅ Гаманець успішно видалено.")
+    else:
+        await msg.answer("⚠️ Гаманець не знайдено.")
+
 # @wallets_router.message(filters.Command("list"))
 # async def list_wallets(msg: types.Message, session: AsyncSession):
 #     user_id = msg.from_user.id
@@ -53,24 +71,6 @@ async def process_wallet_address(
 #     for w in wallets:
 #         response += f"• {w.name}: {w.address}\n"
 #     await msg.answer(response)
-
-
-@wallets_router.message(filters.Command("delete"))
-async def delete_wallet(msg: types.Message, command: CommandObject, session: AsyncSession):
-    args = command.args
-    if not args:
-        await msg.answer("❌ Вкажи назву або адресу гаманця: `/delete MyWallet` або `/delete Hf1Z...`",
-                         parse_mode="Markdown")
-        return
-
-    user_id = msg.from_user.id
-
-    success = await delete_wallet_by_user(session, user_id=user_id, name_or_address=args.strip())
-
-    if success:
-        await msg.answer("✅ Гаманець успішно видалено.")
-    else:
-        await msg.answer("⚠️ Гаманець не знайдено.")
 #
 #
 # @wallets_router.message(filters.Command("stats"))

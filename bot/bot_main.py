@@ -6,6 +6,7 @@ from handlers.start import start_router
 from handlers.wallets import wallets_router
 from aiogram.fsm.storage.memory import MemoryStorage
 from bot.middlewares.db import DbSessionMiddleware
+from aiogram.types import BotCommand, BotCommandScopeDefault
 
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
@@ -18,6 +19,12 @@ dp.message.middleware(DbSessionMiddleware())
 
 
 async def main():
+    print("set commands")
+    await bot.set_my_commands([
+        BotCommand(command="start", description="Запуск бота"),
+        BotCommand(command="add", description="Додати гаманець"),
+        BotCommand(command="delete", description="Видалити гаманець"),
+    ], scope=BotCommandScopeDefault())
     print("Starting bot...")
     await dp.start_polling(bot)
 
