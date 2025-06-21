@@ -5,6 +5,17 @@ from db.models import Wallet
 
 
 async def add_wallet(session: AsyncSession, user_id: int, name: str, address: str):
+    # Перевірка на дублікати по назві або адресі
+    result = await session.execute(
+        select(Wallet).where(
+            Wallet.user_id == user_id,
+            (Wallet.name == name) | (Wallet.address == address)
+        )
+    )
+    existing = result.scalars().first()
+    if existing:
+        return None  # сигнал, що гаманець уже існує
+
     wallet = Wallet(user_id=user_id, name=name, address=address)
     session.add(wallet)
     await session.commit()
