@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 from bot.states.wallet_states import WalletStates
 from db.crud import add_wallet
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.solana_tracker import fetch_wallet_stats
 
 add_wallet_router = Router()
 
@@ -35,11 +36,21 @@ async def process_wallet_address(
     address = msg.text.strip()
     user_id = msg.from_user.id
 
-    wallet = await add_wallet(session, user_id=user_id, name=name, address=address)
+    stats_data = await fetch_wallet_stats(address)
+    if stats_data:
+        win_rate = stats_data.get("win_rate")
+        total_trades = stats_data.get("total_trades")
+        pnl = stats_data.get("pnl")
+
+        wallet = await add_wallet(session, user_id=user_id, name=name, address=address, win_rate=win_rate,
+                                  total_trades=total_trades, pnl=pnl)
+    else:
+        wallet = await add_wallet(session, user_id=user_id, name=name, address=address)
 
     if wallet is None:
         await msg.answer("⚠️ Гаманець з такою назвою або адресою вже існує.")
     else:
         await msg.answer(f"✅ Гаманець <b>{name}</b> з адресою <code>{address}</code> додано!", parse_mode="HTML")
+        await msg.answer(f"✅ Оновлено статистику гаманця <b>{name}</b>", parse_mode="HTML")
 
     await state.clear()

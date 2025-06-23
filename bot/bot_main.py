@@ -3,10 +3,11 @@ from aiogram import Bot, Dispatcher
 from config import settings
 from services.reset_state import reset_state_router
 from handlers.start import start_router
-from handlers.wallets import add_wallet_router, delete_wallet_router, list_wallets_router
+from handlers.wallets import add_wallet_router, delete_wallet_router, list_wallets_router, stats_wallets_router
 from aiogram.fsm.storage.memory import MemoryStorage
 from bot.middlewares.db import DbSessionMiddleware
 from aiogram.types import BotCommand, BotCommandScopeDefault
+from app.services.scheduler import start_scheduler
 
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN)
 
@@ -17,6 +18,7 @@ dp.include_router(start_router)
 dp.include_router(add_wallet_router)
 dp.include_router(delete_wallet_router)
 dp.include_router(list_wallets_router)
+dp.include_router(stats_wallets_router)
 
 dp.message.middleware(DbSessionMiddleware())
 
@@ -27,9 +29,11 @@ async def main():
         BotCommand(command="start", description="Запуск бота"),
         BotCommand(command="add", description="Додати гаманець"),
         BotCommand(command="delete", description="Видалити гаманець"),
-        BotCommand(command="list", description="Список гаманців")
+        BotCommand(command="list", description="Список гаманців"),
+        BotCommand(command="stats", description="Статистика гаманців")
     ], scope=BotCommandScopeDefault())
     print("Starting bot...")
+    # start_scheduler()
     await dp.start_polling(bot)
 
 

@@ -8,17 +8,20 @@ from bot.handlers.start import start_handler
 from bot.handlers.wallets.add_wallet import cmd_start_add_wallet
 from bot.handlers.wallets.list_wallets import list_wallets
 from bot.handlers.wallets.delete_wallet import cmd_start_delete_wallet
+from bot.handlers.wallets.stats_wallets import stats_all_wallets
 
 
 reset_state_router = Router()
 
 
-@reset_state_router.message(Command(commands=["list", "add", "delete", "start"]))
+@reset_state_router.message(Command(commands=["list", "add", "delete", "start", "stats"]))
 async def reset_state_on_command(msg: Message, state: FSMContext, session: AsyncSession):
     await state.clear()
 
     if msg.text == "/list":
-        await list_wallets(msg, session)
+        await list_wallets(msg, session, state)
+    elif msg.text == "/stats":
+        await stats_all_wallets(msg, session, state)
     elif msg.text == "/add":
         await cmd_start_add_wallet(msg, state)
     elif msg.text == "/delete":
