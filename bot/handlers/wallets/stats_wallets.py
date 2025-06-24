@@ -6,10 +6,6 @@ from bot.services.pagination import send_paginated_page
 
 stats_wallets_router = Router()
 
-# stats_wallets.py
-
-
-
 PAGE_SIZE = 5
 
 
@@ -18,7 +14,9 @@ def render_wallet_stats(wallet):
         f"👜 <b>{wallet.name}</b>\n"
         f"🔗 <code>{wallet.address}</code>\n"
         f"🎯 Winrate: <b>{wallet.win_rate:.2f}%</b>\n"
-        f"📈 Total Trades: {wallet.total_trades}\n"
+        f"💸 Total Trades: {wallet.total_trades}\n"
+        f"📈 Total Wins: {wallet.total_wins}\n"
+        f"📉 Total Losses: {wallet.total_losses}\n"
         f"✅ PnL: {wallet.pnl}\n\n"
     )
 

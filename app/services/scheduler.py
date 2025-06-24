@@ -19,9 +19,11 @@ async def update_all_wallets_stats():
                 await update_wallet_stats(
                     session=session,
                     wallet_id=wallet.id,
-                    win_rate=stats["win_rate"],
-                    total_trades=stats["total_trades"],
-                    pnl=stats["pnl"]
+                    win_rate=stats.get("win_rate"),
+                    total_trades=stats.get("total_trades"),
+                    total_wins=stats.get("total_wins"),
+                    total_losses=stats.get("total_losses"),
+                    pnl=stats.get("pnl")
                 )
     print("✅ Статистика оновлена.")
 

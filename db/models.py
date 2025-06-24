@@ -15,5 +15,7 @@ class Wallet(Base):
 
     win_rate = Column(Float, nullable=True)
     total_trades = Column(Integer, nullable=True)
+    total_wins = Column(Integer, nullable=True)
+    total_losses = Column(Integer, nullable=True)
     pnl = Column(Float, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow)
