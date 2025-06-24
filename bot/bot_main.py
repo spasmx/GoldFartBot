@@ -33,6 +33,7 @@ async def main():
         BotCommand(command="stats", description="Статистика гаманців")
     ], scope=BotCommandScopeDefault())
     print("Starting bot...")
+    # update wallets stats
     # start_scheduler()
     await dp.start_polling(bot)
 
