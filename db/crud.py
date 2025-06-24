@@ -6,8 +6,8 @@ from datetime import datetime
 
 
 async def add_wallet(session: AsyncSession, user_id: int, name: str, address: str,
-                     win_rate: float = None, total_trades: int = None, pnl: float = None):
-    print(pnl, "-----------------------------------------------------------------------")
+                     win_rate: float = None, total_trades: int = None, total_wins: int = None,
+                     total_losses: int = None, pnl: float = None):
     # Перевірка на дублікати по назві або адресі
     result = await session.execute(
         select(Wallet).where(
@@ -19,19 +19,23 @@ async def add_wallet(session: AsyncSession, user_id: int, name: str, address: st
     if existing:
         return None  # сигнал, що гаманець уже існує
 
-    wallet = Wallet(user_id=user_id, name=name, address=address, win_rate=win_rate, total_trades=total_trades, pnl=pnl)
+    wallet = Wallet(user_id=user_id, name=name, address=address, win_rate=win_rate, total_trades=total_trades,
+                    total_wins=total_wins, total_losses=total_losses,pnl=pnl)
     session.add(wallet)
     await session.commit()
     return wallet
 
 
-async def update_wallet_stats(session: AsyncSession, wallet_id: int, win_rate: float, total_trades: int, pnl: float):
+async def update_wallet_stats(session: AsyncSession, wallet_id: int, win_rate: float, total_trades: int,
+                              total_wins: int, total_losses: int, pnl: float):
     stmt = (
         update(Wallet)
         .where(Wallet.id == wallet_id)
         .values(
             win_rate=win_rate,
             total_trades=total_trades,
+            total_wins=total_wins,
+            total_losses=total_losses,
             pnl=pnl,
             updated_at=datetime.utcnow()
         )

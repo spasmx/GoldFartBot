@@ -40,10 +40,12 @@ async def process_wallet_address(
     if stats_data:
         win_rate = stats_data.get("win_rate")
         total_trades = stats_data.get("total_trades")
+        total_wins = stats_data.get("total_wins")
+        total_losses = stats_data.get("total_losses")
         pnl = stats_data.get("pnl")
 
         wallet = await add_wallet(session, user_id=user_id, name=name, address=address, win_rate=win_rate,
-                                  total_trades=total_trades, pnl=pnl)
+                                  total_trades=total_trades, total_wins=total_wins, total_losses=total_losses, pnl=pnl)
     else:
         wallet = await add_wallet(session, user_id=user_id, name=name, address=address)
 
