@@ -1,4 +1,6 @@
-from sqlalchemy import delete, and_, or_, update
+from typing import Any, Sequence
+
+from sqlalchemy import delete, and_, or_, update, Row, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from db.models import Wallet
@@ -20,7 +22,7 @@ async def add_wallet(session: AsyncSession, user_id: int, name: str, address: st
         return None  # сигнал, що гаманець уже існує
 
     wallet = Wallet(user_id=user_id, name=name, address=address, win_rate=win_rate, total_trades=total_trades,
-                    total_wins=total_wins, total_losses=total_losses,pnl=pnl)
+                    total_wins=total_wins, total_losses=total_losses, pnl=pnl)
     session.add(wallet)
     await session.commit()
     return wallet
@@ -64,3 +66,16 @@ async def delete_wallet_by_user(session: AsyncSession, user_id: int, name_or_add
     result = await session.execute(stmt)
     await session.commit()
     return result.rowcount > 0
+
+
+async def get_user_by_wallets(session: AsyncSession, address: str):
+    result = await session.execute(select(Wallet).where(Wallet.address == address))
+    return result.scalars().all()
+
+
+async def get_all_wallet_addresses(session: AsyncSession) -> Sequence[Row[Any] | RowMapping | Any]:
+    result = await session.execute(
+        select(Wallet.address).distinct()
+    )
+    addresses = result.scalars().all()
+    return addresses

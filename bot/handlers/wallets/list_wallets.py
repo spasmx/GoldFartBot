@@ -10,7 +10,8 @@ PAGE_SIZE = 5
 
 
 def render_wallet_simple(wallet):
-    return f"🐳🤑 <b>{wallet.name}</b> : <code>{wallet.address}</code>\n"
+    return f"🐳🤑 <a href='https://www.solanatracker.io/wallet/{wallet.address}'>{wallet.name}</a>" \
+           f" : <code>{wallet.address}</code>\n"
 
 
 @list_wallets_router.message(filters.Command("list"))

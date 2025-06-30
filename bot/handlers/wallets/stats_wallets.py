@@ -11,7 +11,7 @@ PAGE_SIZE = 5
 
 def render_wallet_stats(wallet):
     return (
-        f"👜 <b>{wallet.name}</b>\n"
+        f"👜 <a href='https://www.solanatracker.io/wallet/{wallet.address}'>{wallet.name}</a>\n"
         f"🔗 <code>{wallet.address}</code>\n"
         f"🎯 Winrate: <b>{wallet.win_rate:.2f}%</b>\n"
         f"💸 Total Trades: {wallet.total_trades}\n"
@@ -21,12 +21,12 @@ def render_wallet_stats(wallet):
     )
 
 
-def add_tracker_links(builder, wallets):
-    for w in wallets:
-        builder.button(
-            text=f"🌐 Відкрити {w.name} в Solana Tracker",
-            url=f"https://www.solanatracker.io/wallet/{w.address}"
-        )
+# def add_tracker_links(builder, wallets):
+#     for w in wallets:
+#         builder.button(
+#             text=f"🌐 Відкрити {w.name} в Solana Tracker",
+#             url=f"https://www.solanatracker.io/wallet/{w.address}"
+#         )
 
 
 @stats_wallets_router.message(filters.Command("stats"))
@@ -48,8 +48,7 @@ async def stats_all_wallets(msg: types.Message, session: AsyncSession, state: FS
         page_size=PAGE_SIZE,
         render_item_fn=render_wallet_stats,
         callback_prefix="stats_page",
-        title="Статистика гаманців",
-        extra_buttons_fn=add_tracker_links
+        title="Статистика гаманців"
     )
 
 
@@ -67,7 +66,6 @@ async def stats_page_callback(callback: types.CallbackQuery, state: FSMContext):
         page_size=PAGE_SIZE,
         render_item_fn=render_wallet_stats,
         callback_prefix="stats_page",
-        title="Статистика гаманців",
-        extra_buttons_fn=add_tracker_links
+        title="Статистика гаманців"
     )
     await callback.answer()

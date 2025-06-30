@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from bot.states.wallet_states import WalletStates
 from db.crud import add_wallet
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.solana_tracker import fetch_wallet_stats
+from app.services_app.solana_tracker import fetch_wallet_stats
 
 add_wallet_router = Router()
 

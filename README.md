@@ -1,6 +1,7 @@
 
 ├── app/
 │   ├── api/                      # FastAPI роутери та схеми
+│   │   ├──router.py
 │   ├── core/                     # Налаштування, конфігурації
 │   ├── models/                   # Pydantic моделі
 │   ├── services/                 # Логіка взаємодії з Solana та Telegram

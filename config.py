@@ -6,10 +6,16 @@ load_dotenv()
 
 class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str
-    SOLANA_RPC_URL: str = "https://api.mainnet-beta.solana.com"
     DATABASE_URL: str
     SOLANA_TRACKER_TOKEN: str
     SOLANA_TRACKER_URL: str
+    HELIUS_API_KEY: str
+    HELIUS_BASE_URL: str
+    HELIUS_WEBHOOK_URL: str
+    WEBHOOK_ID: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
 
     class Config:
         env_file = ".env"

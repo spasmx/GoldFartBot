@@ -40,6 +40,7 @@ async def send_paginated_page(
     keyboard = builder.as_markup()
 
     if isinstance(msg_or_callback, types.Message):
-        await msg_or_callback.answer(response, parse_mode="HTML", reply_markup=keyboard)
+        await msg_or_callback.answer(response, parse_mode="HTML", reply_markup=keyboard, disable_web_page_preview=True)
     else:
-        await msg_or_callback.message.edit_text(response, parse_mode="HTML", reply_markup=keyboard)
+        await msg_or_callback.message.edit_text(response, parse_mode="HTML", reply_markup=keyboard,
+                                                disable_web_page_preview=True)

@@ -2,7 +2,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from db.models import Wallet
 from db.session import async_session_maker
 from db.crud import update_wallet_stats
-from app.services.solana_tracker import fetch_wallet_stats
+from app.services_app.solana_tracker import fetch_wallet_stats
 from sqlalchemy.future import select
 
 scheduler = AsyncIOScheduler()
