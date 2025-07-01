@@ -28,12 +28,12 @@ async def get_token_info(event: dict) -> dict:
             "is_burned": False,
             "ath": "N/A",
             "dexscreener": f"https://dexscreener.com/solana/{token_address}",
-            "gngm": f"https://gngm.xyz/token/{token_address}",
-            "axiom": f"https://axiom.xyz/token/{token_address}",
+            "gmgn": f"https://gmgn.ai/sol/token/{token_address}",
+            #"axiom": f"https://axiom.xyz/token/{token_address}",
         }
 
     base_token = pair_data.get("baseToken", {})
-    token_name = base_token.get("name", "Unknown Token")
+    token_name = base_token.get("symbol", "Unknown Token")
     dex_url = pair_data.get("url", f"https://dexscreener.com/solana/{token_address}")
     token_price = pair_data.get("priceNative")
     token_price_usd = pair_data.get("priceUsd")

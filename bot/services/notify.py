@@ -23,7 +23,7 @@ async def send_token_notification(user_id, wallet_name, wallet_address: str, swa
     axiom = info.get("axiom") or "#"
 
     message = (
-        f"{emoji} <b>{swap_type.upper()} {token_name} on {dex}</b>\n"
+        f"{emoji} <b>{swap_type.upper()} ${token_name} on {dex}</b>\n"
         f"👤<b>{wallet_name}</b>\n"
         f"<code>{wallet_address_safe}</code>\n"
         f"💰 <b>{amount_sol} SOL</b> (${amount_usd})\n\n"
