@@ -33,7 +33,8 @@ async def get_token_info(event: dict) -> dict:
         }
 
     base_token = pair_data.get("baseToken", {})
-    token_name = base_token.get("symbol", "Unknown Token")
+    token_symbol = base_token.get("symbol", "Unknown Token")
+    token_name = base_token.get("name", "Unknown Token")
     dex_url = pair_data.get("url", f"https://dexscreener.com/solana/{token_address}")
     token_price = pair_data.get("priceNative")
     token_price_usd = pair_data.get("priceUsd")
@@ -42,6 +43,7 @@ async def get_token_info(event: dict) -> dict:
     liquidity = pair_data.get("liquidity", {}).get("usd")
 
     return {
+        "token_symbol": token_symbol,
         "token_name": token_name,
         "token_address": token_address,
         "token_price": token_price,
@@ -49,6 +51,6 @@ async def get_token_info(event: dict) -> dict:
         "market_cap": format_number(market_cap) if market_cap else "N/A",
         "liquidity": format_number(liquidity) if liquidity else "N/A",
         "dexscreener": dex_url,
-        "gngm": f"https://gngm.xyz/token/{token_address}",
-        "axiom": f"https://axiom.xyz/token/{token_address}",
+        "gmgn": f"https://gmgn.ai/sol/token/{token_address}",
+        #"axiom": f"https://axiom.xyz/token/{token_address}",
     }
